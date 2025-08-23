@@ -1,7 +1,7 @@
 {
   "name": "jftp",
   "description": "Node.js interprocess communication with JSON",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "src/socket.mjs",
   "types": "src/socket.d.ts",
@@ -19,5 +19,18 @@
   },
   "homepage": "https://github.com/ArmoredFuzzball/jftp#readme",
   "license": "MIT",
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "keywords": [
+    "json",
+    "ipc",
+    "interprocess",
+    "communication",
+    "unix",
+    "domain",
+    "sockets",
+    "jftp",
+    "fast",
+    "transfer",
+    "protocol"
+  ]
 }

@@ -6,7 +6,7 @@ For small payloads, this library offers extremely high speed communication with 
 <br>
 NOTE: For larger payloads (more than ~40 KB), popular HTTP-based libraries start to quickly outperform this library by a large margin, as their overhead no longer dominates at that scale and actually starts helping.
 <br><br>
-This library is best suited for scenarios where you need high bandwidth and low latency with small payloads (for example, a backend authentication service, which just transmits tokens or user credentials to other services).
+JFTP is best suited for scenarios where you need high bandwidth and low latency with small JSON payloads (for example, a backend authentication service, which just transmits tokens or user credentials to other services).
 
 <h2>Security</h2>
 Unix Domain Sockets are not exposed to the network. Instead, they are files in the file system. This typically makes them more secure than communication over localhost. Care should still be taken to ensure that the folder which contains the Unix Domain Socket file is properly permissioned and accessible only to trusted users. This helps prevent unauthorized access to the communication channel.
