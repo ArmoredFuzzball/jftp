@@ -1,0 +1,17 @@
+{
+  "name": "jtp",
+  "description": "Interprocess communication with JSON",
+  "version": "1.0.4",
+  "type": "module",
+  "main": "src/socket.mjs",
+  "types": "src/socket.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/socket.d.ts",
+      "import": "./src/socket.mjs",
+      "default": "./src/socket.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "license": "MIT"
+}
