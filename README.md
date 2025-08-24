@@ -24,6 +24,7 @@ NOTE: For larger payloads (more than ~96 KB), popular HTTP-based libraries start
     </tr>
   </thead>
   <tbody>
+    <tr><td>0</td><td>28,050</td><td>183,300</td><td>0.07</td><td>0.014</td></tr>
     <tr><td>0.5</td><td>10,700</td><td>131,500</td><td>0.28</td><td>0.02</td></tr>
     <tr><td>1</td><td>10,600</td><td>110,100</td><td>0.29</td><td>0.02</td></tr>
     <tr><td>2</td><td>10,300</td><td>87,250</td><td>0.28</td><td>0.03</td></tr>
