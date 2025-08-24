@@ -21,11 +21,12 @@ export default class UDSocket extends net.Socket {
   rpc(data: Object): Promise<Object>;
 
   /**
-   * Install a synchronous handler function for incoming requests.
-   * The handler receives a JSON request and should return a JSON object (synchronously)
-   * that will be sent back to the requester process.
+   * Install a handler function for incoming requests.
+   * The handler receives a JSON request and should return a JSON object or promise that resolves to a JSON object.
+   * 
+   * Errors can be safely thrown inside the handler and will be sent back to the requester as an error response.
    */
-  handle(fn: (message: Object) => Object): void;
+  handle(handler: (data: Object) => Object | Promise<Object>): void;
 }
 
 /**

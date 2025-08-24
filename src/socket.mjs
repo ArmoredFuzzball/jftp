@@ -87,7 +87,18 @@ export class UDSocketServer extends net.Server {
   _processRequest(socket, message) {
     if (!socket.handler) return;
     const request = JSON.parse(message);
-    request.data = socket.handler(request.data);
-    socket._send(request);
+    const result = socket.handler(request.data);
+    if (!(result instanceof Promise)) {
+      request.data = result;
+      return socket._send(request);
+    }
+    result.then(data => {
+      request.data = data;
+      socket._send(request);
+    }).catch(err => {
+      if (err instanceof Error) request.error = { code: err.code, message: err.message };
+      else request.error = err;
+      socket._send(request);
+    });
   }
 }
