@@ -8,18 +8,6 @@ NOTE: For larger payloads (more than ~96 KB), popular HTTP-based libraries start
 
 <h3>Benchmarks</h3>
 
-<style>
-  table.center caption {
-    font-weight: 600;
-    margin-bottom: .4rem;
-  }
-  table.center th,
-  table.center td {
-    text-align: center;
-    padding: 4px 12px;
-    border: 1px solid #ccc;
-  }
-</style>
 <table class="center">
   <caption>Performance comparison of Fastify+Fetch and JFTP</caption>
   <thead>
