@@ -3,8 +3,9 @@ import { unlinkSync, existsSync } from 'node:fs';
 import PayloadEncoder from './buffers.mjs';
 
 export default class UDSocket extends net.Socket {
-  constructor() {
+  constructor(timeoutMs = 5000) {
     super();
+    this.timeoutMs = timeoutMs;
     this.encoder = new PayloadEncoder();
     this.ACKQueue = {};
     this.counter = 0n;
@@ -15,10 +16,18 @@ export default class UDSocket extends net.Socket {
   rpc(data) {
     const id = `${process.pid}-${this.counter++}`;
     this._send({ id, data });
-    return new Promise((res, rej) => { this.ACKQueue[id] = [res, rej] });
+    return new Promise((res, rej) => this._addToACKQueue(id, res, rej));
   }
 
   handle(fn) { this.handler = fn }
+
+  _addToACKQueue(id, resolve, reject) {
+    this.ACKQueue[id] = {
+      resolve,
+      reject,
+      timeout: setTimeout(() => reject(new Error("RPC timeout")), this.timeoutMs)
+    }
+  }
 
   _send(data) {
     if (this.closed) throw new Error("Socket is closed");
@@ -35,8 +44,9 @@ export default class UDSocket extends net.Socket {
     const response = JSON.parse(message);
     const promise = this.ACKQueue[response.id];
     if (!promise) return;
-    if (response.error) promise[1](new Error(response.error));
-    else promise[0](response.data); delete this.ACKQueue[response.id];
+    if (response.error) promise.reject(new Error(response.error));
+    else promise.resolve(response.data);
+    delete this.ACKQueue[response.id];
   }
 }
 

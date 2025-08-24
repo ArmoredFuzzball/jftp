@@ -92,8 +92,7 @@ socket.rpc({ anything: 'Hello from client!' })
     console.log('Received response:', response);
   })
   .catch(error => {
-    //currently not implemented, promise will never reject
-    //timeout handling may be added in future
+    console.error('RPC error:', error);
   });
 
 // Handle socket errors
