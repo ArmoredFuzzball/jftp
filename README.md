@@ -2,11 +2,61 @@
 This simple library provides a fast and efficient way to communicate between different Node.js processes using JSON over Unix Domain Sockets.
 
 <h2>Performance</h2>
-For small payloads, this library offers extremely high speed communication with minimal overhead, considerably higher bandwidth and lower latency than popular alternatives.
+For small to medium payloads, this library offers extremely high speed communication with minimal overhead, considerably higher bandwidth and lower latency than popular alternatives.
 <br>
-NOTE: For larger payloads (more than ~40 KB), popular HTTP-based libraries start to quickly outperform this library by a large margin, as their overhead no longer dominates at that scale and actually starts helping.
-<br><br>
-JFTP is best suited for scenarios where you need high bandwidth and low latency with small JSON payloads (for example, a backend authentication service, which just transmits tokens or user credentials to other services).
+NOTE: For larger payloads (more than ~96 KB), popular HTTP-based libraries start to quickly outperform this library by a large margin, as their protocol overhead no longer dominates at that scale and actually starts helping.
+
+<h3>Benchmarks</h3>
+
+<style>
+  table.center caption {
+    font-weight: 600;
+    margin-bottom: .4rem;
+  }
+  table.center th,
+  table.center td {
+    text-align: center;
+    padding: 4px 12px;
+    border: 1px solid #ccc;
+  }
+</style>
+<table class="center">
+  <caption>Performance comparison of Fastify+Fetch and JFTP</caption>
+  <thead>
+    <tr>
+      <th rowspan="2">Payload<br>size (KB)</th>
+      <th colspan="2">Req/sec</th>
+      <th colspan="2">Latency (ms)</th>
+    </tr>
+    <tr>
+      <th>Fastify</th>
+      <th>JFTP</th>
+      <th>Fastify</th>
+      <th>JFTP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>0.5</td><td>10,700</td><td>131,500</td><td>0.28</td><td>0.02</td></tr>
+    <tr><td>1</td><td>10,600</td><td>110,100</td><td>0.29</td><td>0.02</td></tr>
+    <tr><td>2</td><td>10,300</td><td>87,250</td><td>0.28</td><td>0.03</td></tr>
+    <tr><td>4</td><td>10,300</td><td>62,100</td><td>0.29</td><td>0.04</td></tr>
+    <tr><td>8</td><td>9,975</td><td>39,600</td><td>0.29</td><td>0.07</td></tr>
+    <tr><td>12</td><td>9,800</td><td>28,800</td><td>0.31</td><td>0.09</td></tr>
+    <tr><td>16</td><td>9,300</td><td>22,800</td><td>0.33</td><td>0.13</td></tr>
+    <tr><td>24</td><td>8,925</td><td>16,100</td><td>0.41</td><td>0.17</td></tr>
+    <tr><td>32</td><td>8,600</td><td>12,400</td><td>0.55</td><td>0.26</td></tr>
+    <tr><td>48</td><td>7,875</td><td>8,400</td><td>1.6</td><td>0.36</td></tr>
+    <tr><td>64</td><td>6,220</td><td>6,350</td><td>11.7</td><td>0.42</td></tr>
+    <tr><td>72</td><td>5,350</td><td>5,800</td><td>14.2</td><td>0.44</td></tr>
+    <tr><td>96</td><td>4,300</td><td>4,300</td><td>20.8</td><td>2.4</td></tr>
+    <tr><td>128</td><td>3,320</td><td>2,350</td><td>29.8</td><td>42</td></tr>
+    <tr><td>256</td><td>1,420</td><td>655</td><td>70.8</td><td>152</td></tr>
+  </tbody>
+</table>
+
+*Tested under equal conditions with no routing on Node.js v22.18.0*
+
+JFTP is best suited for scenarios where you need high bandwidth and low latency with small to medium JSON payloads (for example, a backend authentication service, which just transmits tokens or user credentials to other services).
 
 <h2>Security</h2>
 Unix Domain Sockets are not exposed to the network. Instead, they are files in the file system. This typically makes them more secure than communication over localhost. Care should still be taken to ensure that the folder which contains the Unix Domain Socket file is properly permissioned and accessible only to trusted users. This helps prevent unauthorized access to the communication channel.
@@ -54,6 +104,7 @@ socket.rpc({ anything: 'Hello from client!' })
   })
   .catch(error => {
     //currently not implemented, promise will never reject
+    //timeout handling may be added in future
   });
 
 // Handle socket errors

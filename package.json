@@ -1,7 +1,7 @@
 {
   "name": "jftp",
   "description": "Node.js interprocess communication with JSON",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "main": "src/socket.mjs",
   "types": "src/socket.d.ts",

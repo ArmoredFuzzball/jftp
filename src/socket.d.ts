@@ -7,6 +7,15 @@ export default class UDSocket extends net.Socket {
   constructor();
 
   /**
+   * Object containing all pending ACKs, keyed by message ID.
+   * Each entry is a tuple of [resolve, reject] functions from the internal request Promise.
+   * This is used internally to match incoming ACKs to their original requests.
+   * 
+   * Its length can be used to measure how many requests are currently pending.
+   */
+  ACKQueue: { [id: string]: [(data: JSON) => void, (err: Error) => void] };
+
+  /**
    * Send an RPC-style message (JSON) to the server process and return a Promise that resolves with JSON data.
    */
   rpc(data: JSON): Promise<JSON>;
