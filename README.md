@@ -68,6 +68,11 @@ server.on('connection', (socket) => {
     return { anything: 'Hello from server!' };
   });
 
+  // Handle socket disconnect
+  socket.on('close', () => {
+    console.log('Client disconnected');
+  });
+
   // Handle socket errors
   socket.on('error', (error) => {
     console.error('Socket error:', error);
@@ -84,16 +89,7 @@ server.start(SOCKET_PATH, () => console.log(`Server listening on ${SOCKET_PATH}`
 import UDSocket from 'jftp';
 const SOCKET_PATH = './secure_directory/my_socket.sock';
 
-const socket = new UDSocket();
-
-// Send a message and wait for a response
-socket.rpc({ anything: 'Hello from client!' })
-  .then(response => {
-    console.log('Received response:', response);
-  })
-  .catch(error => {
-    console.error('RPC error:', error);
-  });
+const socket = new UDSocket(3000); //custom timeout
 
 // Handle socket errors
 socket.on('error', (error) => {
@@ -101,5 +97,17 @@ socket.on('error', (error) => {
 });
 
 // Connect to the server
-socket.connect(SOCKET_PATH, () => console.log("Connected to the server"));
+socket.connect(SOCKET_PATH, () => {
+  console.log("Connected to the server");
+
+  // Send a message and wait for a response
+  socket.rpc({ anything: 'Hello from client!' })
+    .then(response => {
+      console.log('Received response:', response);
+    })
+    .catch(error => {
+      console.error('RPC error:', error);
+    });
+
+});
 ```
