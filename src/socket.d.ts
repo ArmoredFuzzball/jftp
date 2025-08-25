@@ -4,7 +4,7 @@ import * as net from 'net';
  * A client socket that connects to a unix domain socket server and can send/receive JSON messages.
  */
 export default class UDSocket extends net.Socket {
-  constructor();
+  constructor(timeoutMs?: number);
 
   /**
    * Object containing all pending ACKs, keyed by message ID.

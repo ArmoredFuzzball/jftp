@@ -108,6 +108,5 @@ socket.connect(SOCKET_PATH, () => {
     .catch(error => {
       console.error('RPC error:', error);
     });
-
 });
 ```
