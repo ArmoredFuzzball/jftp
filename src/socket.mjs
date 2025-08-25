@@ -44,8 +44,9 @@ export default class UDSocket extends net.Socket {
     const response = JSON.parse(message);
     const promise = this.ACKQueue[response.id];
     if (!promise) return;
-    if (response.error) promise.reject(new Error(response.error));
-    else promise.resolve(response.data);
+    if (response.error == null) promise.resolve(response.data);
+    else if (response.error instanceof Object) promise.reject(response.error);
+    else promise.reject(new Error(response.error));
     delete this.ACKQueue[response.id];
   }
 }
