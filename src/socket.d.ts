@@ -4,21 +4,21 @@ import * as net from 'net';
  * A client socket that connects to a unix domain socket server and can send/receive JSON messages.
  */
 export default class UDSocket extends net.Socket {
-  constructor(timeoutMs?: number);
+  constructor(options?: { timeoutMs?: number; encoderOptions?: { headerSize?: number; maxPayloadSize?: number; poolSize?: number } });
 
   /**
    * Object containing all pending ACKs, keyed by message ID.
-   * Each entry is a tuple of [resolve, reject] functions from the internal request Promise.
+   * Each entry is an object of {resolve, reject, timeout} functions from the internal request Promise.
    * This is used internally to match incoming ACKs to their original requests.
    * 
    * Its length can be used to measure how many requests are currently pending.
    */
-  ACKQueue: { [id: string]: [(data: Object) => void, (err: Error) => void] };
+  ACKQueue: { [id: string]: [(data?: string | Object) => void, (err: Error | Object | string) => void, NodeJS.Timeout] };
 
   /**
    * Send an RPC-style message (JSON) to the server process and return a Promise that resolves with JSON data.
    */
-  rpc(data: Object): Promise<Object>;
+  rpc(data?: string | Object): Promise<string | Object | undefined>;
 
   /**
    * Install a handler function for incoming requests.
@@ -26,7 +26,7 @@ export default class UDSocket extends net.Socket {
    * 
    * Errors can be safely thrown inside the handler and will be sent back to the requester as an error response.
    */
-  handle(handler: (data: Object) => Object | Promise<Object>): void;
+  handle(handler: (data?: string | Object) => string | Object | undefined | Promise<string | Object | undefined>): void;
 }
 
 /**
@@ -36,7 +36,7 @@ export class UDSocketServer extends net.Server {
   /**
    * Optionally accept a connectionListener that receives a UDSocket.
    */
-  constructor(connectionListener?: (socket: UDSocket) => void);
+  constructor(connectionListener?: (socket: UDSocket) => void, clientOptions?: { timeoutMs?: number; encoderOptions?: { headerSize?: number; maxPayloadSize?: number; poolSize?: number } });
 
   // Overload .on to match net.Server and add custom UDSocket signature
   on(event: 'connection', listener: (socket: UDSocket) => void): this;

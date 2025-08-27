@@ -3,10 +3,10 @@ import { unlinkSync, existsSync } from 'node:fs';
 import PayloadEncoder from './buffers.mjs';
 
 export default class UDSocket extends net.Socket {
-  constructor(timeoutMs = 5000) {
+  constructor(options = { timeoutMs: 5000, encoderOptions: undefined }) {
     super();
-    this.timeoutMs = timeoutMs;
-    this.encoder = new PayloadEncoder();
+    this.timeoutMs = options.timeoutMs;
+    this.encoder = new PayloadEncoder(options.encoderOptions);
     this.ACKQueue = {};
     this.counter = 0n;
     this.processor = this._processResponse;
@@ -31,7 +31,7 @@ export default class UDSocket extends net.Socket {
 
   _send(data) {
     if (this.closed) throw new Error("Socket is closed");
-    const string = JSON.stringify(data);
+    const string = typeof data === 'string' ? data : JSON.stringify(data);
     const payload = this.encoder.encode(string);
     this.write(payload);
   }
@@ -52,8 +52,8 @@ export default class UDSocket extends net.Socket {
 }
 
 export class UDSocketServer extends net.Server {
-  constructor(connectionListener) {
-    const wrap = (fn) => (sock) => fn(this._wrapSocket(sock));
+  constructor(connectionListener, clientOptions = undefined) {
+    const wrap = (fn) => (sock) => fn(this._wrapSocket(sock, clientOptions));
     super(connectionListener ? wrap(connectionListener) : undefined);
     //cast for all 3 listener types of 'connection' event
     ["on", "once", "addListener"].forEach(m =>
@@ -67,10 +67,11 @@ export class UDSocketServer extends net.Server {
   }
 
   //essentially cast net.Socket to UDSocket
-  _wrapSocket(socket) {
-    const tmp = new UDSocket();
+  _wrapSocket(socket, clientOptions) {
+    const tmp = new UDSocket(clientOptions);
     Object.setPrototypeOf(socket, UDSocket.prototype);
     Object.assign(socket, {
+      timeoutMs: tmp.timeoutMs,
       encoder: tmp.encoder,
       ACKQueue: tmp.ACKQueue,
       counter: tmp.counter,

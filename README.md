@@ -89,7 +89,7 @@ server.start(SOCKET_PATH, () => console.log(`Server listening on ${SOCKET_PATH}`
 import UDSocket from 'jftp';
 const SOCKET_PATH = './secure_directory/my_socket.sock';
 
-const socket = new UDSocket(3000); //custom timeout
+const socket = new UDSocket({ timeoutMs: 3000 }); //custom timeout
 
 // Handle socket errors
 socket.on('error', (error) => {

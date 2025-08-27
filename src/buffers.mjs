@@ -1,8 +1,8 @@
 export default class PayloadEncoder {
-  constructor(headerBytes = 4, maxPayloadBytes = 1024 * 1024) {
-    this.HEADER_BYTES = headerBytes;
-    this.POOL_SIZE = (maxPayloadBytes + headerBytes) * 4;
-    this.MAX_PAYLOAD_SIZE = maxPayloadBytes;
+  constructor(options = { headerSize: 4, maxPayloadSize: 1024 * 1024, poolSize: undefined }) {
+    this.HEADER_BYTES = options.headerSize;
+    this.MAX_PAYLOAD_SIZE = options.maxPayloadSize;
+    this.POOL_SIZE = options.poolSize || (this.HEADER_BYTES + this.MAX_PAYLOAD_SIZE) * 4;
     this.pool = Buffer.allocUnsafe(this.POOL_SIZE);
     this.offset = 0;
     this.buffers = []; // queue of incoming buffers
