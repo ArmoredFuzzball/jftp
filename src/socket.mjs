@@ -52,7 +52,7 @@ export default class UDSocket extends net.Socket {
 }
 
 export class UDSocketServer extends net.Server {
-  constructor(connectionListener, clientOptions = undefined) {
+  constructor(clientOptions = undefined, connectionListener) {
     const wrap = (fn) => (sock) => fn(this._wrapSocket(sock, clientOptions));
     super(connectionListener ? wrap(connectionListener) : undefined);
     //cast for all 3 listener types of 'connection' event

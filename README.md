@@ -24,26 +24,26 @@ NOTE: For larger payloads (more than ~96 KB), popular HTTP-based libraries start
     </tr>
   </thead>
   <tbody>
-    <tr><td>0</td><td>28,050</td><td>183,300</td><td>0.07</td><td>0.014</td></tr>
-    <tr><td>0.5</td><td>10,700</td><td>131,500</td><td>0.28</td><td>0.02</td></tr>
-    <tr><td>1</td><td>10,600</td><td>110,100</td><td>0.29</td><td>0.02</td></tr>
-    <tr><td>2</td><td>10,300</td><td>87,250</td><td>0.28</td><td>0.03</td></tr>
-    <tr><td>4</td><td>10,300</td><td>62,100</td><td>0.29</td><td>0.04</td></tr>
-    <tr><td>8</td><td>9,975</td><td>39,600</td><td>0.29</td><td>0.07</td></tr>
-    <tr><td>12</td><td>9,800</td><td>28,800</td><td>0.31</td><td>0.09</td></tr>
-    <tr><td>16</td><td>9,300</td><td>22,800</td><td>0.33</td><td>0.13</td></tr>
-    <tr><td>24</td><td>8,925</td><td>16,100</td><td>0.41</td><td>0.17</td></tr>
-    <tr><td>32</td><td>8,600</td><td>12,400</td><td>0.55</td><td>0.26</td></tr>
-    <tr><td>48</td><td>7,875</td><td>8,400</td><td>1.6</td><td>0.36</td></tr>
-    <tr><td>64</td><td>6,220</td><td>6,350</td><td>11.7</td><td>0.42</td></tr>
-    <tr><td>72</td><td>5,350</td><td>5,800</td><td>14.2</td><td>0.44</td></tr>
-    <tr><td>96</td><td>4,300</td><td>4,300</td><td>20.8</td><td>2.4</td></tr>
-    <tr><td>128</td><td>3,320</td><td>2,350</td><td>29.8</td><td>42</td></tr>
-    <tr><td>256</td><td>1,420</td><td>655</td><td>70.8</td><td>152</td></tr>
+    <tr><td>~0</td><td>10,900</td><td>123,400</td><td>0.27</td><td>0.019</td></tr>
+    <tr><td>0.5</td><td>10,300</td><td>98,400</td><td>0.28</td><td>0.028</td></tr>
+    <tr><td>1</td><td>10,200</td><td>84,300</td><td>0.28</td><td>0.033</td></tr>
+    <tr><td>2</td><td>9,800</td><td>65,600</td><td>0.29</td><td>0.041</td></tr>
+    <tr><td>4</td><td>9,100</td><td>46,700</td><td>0.30</td><td>0.055</td></tr>
+    <tr><td>8</td><td>8,200</td><td>30,300</td><td>0.33</td><td>0.091</td></tr>
+    <tr><td>12</td><td>7,400</td><td>22,000</td><td>0.35</td><td>0.12</td></tr>
+    <tr><td>16</td><td>6,700</td><td>17,300</td><td>0.38</td><td>0.15</td></tr>
+    <tr><td>24</td><td>5,500</td><td>12,200</td><td>0.45</td><td>0.20</td></tr>
+    <tr><td>32</td><td>5,000</td><td>9,300</td><td>0.50</td><td>0.26</td></tr>
+    <tr><td>48</td><td>3,800</td><td>6,400</td><td>0.64</td><td>0.38</td></tr>
+    <tr><td>64</td><td>3,000</td><td>4,900</td><td>0.78</td><td>0.56</td></tr>
+    <tr><td>72</td><td>2,700</td><td>4,200</td><td>0.86</td><td>0.56</td></tr>
+    <tr><td>96</td><td>2,200</td><td>3,100</td><td>1.04</td><td>3.5</td></tr>
+    <tr><td>128</td><td>1,800</td><td>2,100</td><td>1.31</td><td>46.9</td></tr>
+    <tr><td>256</td><td>900</td><td>600</td><td>2.77</td><td>160</td></tr>
   </tbody>
 </table>
 
-*Tested under equal conditions with no routing on Node.js v22.18.0*
+*Test conducted with JFTP 1.5.1, Fastify 5.5.0, Node.js v22.18.0*
 
 JFTP is best suited for scenarios where you need high bandwidth and low latency with small to medium JSON payloads (for example, a backend authentication service, which just transmits tokens or user credentials to other services).
 

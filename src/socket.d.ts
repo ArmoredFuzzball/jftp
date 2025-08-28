@@ -1,10 +1,31 @@
 import * as net from 'net';
 
+/** Options for the payload encoder/decoder */
+export interface EncoderOptions {
+  /** Number of bytes for the message length header (default 4) */
+  headerSize?: number;
+
+  /** Maximum allowed payload size in bytes (default 1048576 = 1MB) */
+  maxPayloadSize?: number;
+
+  /** Size of preallocated buffer in bytes for the internal encode function (default (payloadSize + headerSize) * 4) */
+  poolSize?: number;
+}
+
+/** Options for UDSocket and UDSocketServer */
+export interface Options {
+  /** Number of milliseconds to wait for an ACK before rejecting the rpc Promise (default 5000) */
+  timeoutMs?: number;
+
+  /** Options object passed to the internal encoder/decoder */
+  encoderOptions?: EncoderOptions;
+}
+
 /**
  * A client socket that connects to a unix domain socket server and can send/receive JSON messages.
  */
 export default class UDSocket extends net.Socket {
-  constructor(options?: { timeoutMs?: number; encoderOptions?: { headerSize?: number; maxPayloadSize?: number; poolSize?: number } });
+  constructor(options?: Options);
 
   /**
    * Object containing all pending ACKs, keyed by message ID.
@@ -36,7 +57,7 @@ export class UDSocketServer extends net.Server {
   /**
    * Optionally accept a connectionListener that receives a UDSocket.
    */
-  constructor(connectionListener?: (socket: UDSocket) => void, clientOptions?: { timeoutMs?: number; encoderOptions?: { headerSize?: number; maxPayloadSize?: number; poolSize?: number } });
+  constructor(clientOptions?: Options, connectionListener?: (socket: UDSocket) => void);
 
   // Overload .on to match net.Server and add custom UDSocket signature
   on(event: 'connection', listener: (socket: UDSocket) => void): this;
