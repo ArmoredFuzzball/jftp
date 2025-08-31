@@ -8,14 +8,14 @@ export default class UDSocket extends net.Socket {
     this.timeoutMs = options.timeoutMs ?? 5000;
     this.encoder = new PayloadEncoder(options.encoderOptions);
     this.ACKQueue = {};
-    this.counter = 0n;
+    this.counter = 0;
     this.processor = this._processResponse;
     this.on('data', this._receive);
   }
 
   rpc(data) {
-    const id = `${process.pid}-${this.counter++}`;
-    this._send({ id, data });
+    const id = process.pid + this.counter++;
+    this._send([id, data]);
     return new Promise((res, rej) => this._addToACKQueue(id, res, rej));
   }
 
@@ -31,7 +31,7 @@ export default class UDSocket extends net.Socket {
 
   _send(data) {
     if (this.closed) throw new Error("Socket is closed");
-    const string = typeof data === 'string' ? data : JSON.stringify(data);
+    const string = JSON.stringify(data);
     const payload = this.encoder.encode(string);
     this.write(payload);
   }
@@ -42,12 +42,12 @@ export default class UDSocket extends net.Socket {
 
   _processResponse(message) {
     const response = JSON.parse(message);
-    const promise = this.ACKQueue[response.id];
+    const promise = this.ACKQueue[response[0]];
     if (!promise) return;
-    if (response.error == null) promise.resolve(response.data);
-    else if (response.error instanceof Object) promise.reject(response.error);
-    else promise.reject(new Error(response.error));
-    delete this.ACKQueue[response.id];
+    if (response[2] == null) promise.resolve(response[1]);
+    else if (response[2] instanceof Object) promise.reject(response[2]);
+    else promise.reject(new Error(response[2]));
+    delete this.ACKQueue[response[0]];
   }
 }
 
@@ -90,21 +90,21 @@ export class UDSocketServer extends net.Server {
     if (!socket.handler) return;
     const request = JSON.parse(message);
     try {
-      const result = socket.handler(request.data);
+      const result = socket.handler(request[1]);
       if (!(result instanceof Promise)) {
-        request.data = result;
+        request[1] = result;
         return socket._send(request);
       }
       result.then(data => {
-        request.data = data;
+        request[1] = data;
         socket._send(request);
       }).catch(err => this._handleError(socket, err, request));
     } catch (err) { this._handleError(socket, err, request) };
   }
 
   _handleError(socket, err, response) {
-    if (err instanceof Error) response.error = { code: err.code, message: err.message };
-    else response.error = err;
+    if (err instanceof Error) response[2] = { code: err.code, message: err.message };
+    else response[2] = err;
     socket._send(response);
   }
 }
