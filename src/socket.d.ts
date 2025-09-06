@@ -2,19 +2,17 @@ import * as net from 'net';
 
 /** Options for the payload encoder/decoder */
 export interface EncoderOptions {
-  /** Number of bytes for the message length header (default 4) */
+  /**
+   * Number of digits used to represent the max length of a message in decimal form (default 7).
+   * 
+   * E.g. 7 digits allows messages up to 9,999,999 bytes (under 10MB).
+   */
   headerSize?: number;
-
-  /** Maximum allowed payload size in bytes (default 1048576 = 1MB) */
-  maxPayloadSize?: number;
-
-  /** Size of preallocated buffer in bytes for the internal encode function (default (payloadSize + headerSize) * 4) */
-  poolSize?: number;
 }
 
 /** Options for UDSocket and UDSocketServer */
 export interface Options {
-  /** Number of milliseconds to wait for an ACK before rejecting the rpc Promise (default 5000) */
+  /** Number of milliseconds to wait for an ACK before rejecting the rpc Promise (default 5000). */
   timeoutMs?: number;
 
   /** Options object passed to the internal encoder/decoder */

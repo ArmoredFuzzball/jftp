@@ -1,70 +1,69 @@
 export default class PayloadEncoder {
-  constructor(options = { headerSize: undefined, maxPayloadSize: undefined, poolSize: undefined }) {
-    this.HEADER_BYTES = options.headerSize ?? 4;
-    this.MAX_PAYLOAD_SIZE = options.maxPayloadSize ?? 1024 * 1024;
-    this.POOL_SIZE = options.poolSize ?? (this.HEADER_BYTES + this.MAX_PAYLOAD_SIZE) * 4;
-    this.pool = Buffer.allocUnsafe(this.POOL_SIZE);
-    this.offset = 0;
-    this.buffers = []; // queue of incoming buffers
-    this.totalLength = 0; // track available bytes
-    this.expectedLength = null; // how long the current payload should be
+  constructor(options = { headerSize: undefined }) {
+    this.HEADER_BYTES = options.headerSize ?? 7;
+    this.buffer = Buffer.alloc(0); // leftover bytes between pushes
   }
 
   /** @param {string} str */
   encode(str) {
-    const byteLength = Buffer.byteLength(str);
-    if (byteLength > this.MAX_PAYLOAD_SIZE) throw new Error("Payload too large");
-    this._enlargePool(byteLength);
-    const start = this.offset;
-    this.offset += this.HEADER_BYTES + byteLength;
-    this.pool.writeUInt32BE(byteLength, start);
-    this.pool.write(str, start + this.HEADER_BYTES);
-    const payload = this.pool.subarray(start, this.offset);
-    return payload;
-  }
-
-  _enlargePool(byteLength) {
-    if (this.offset + this.HEADER_BYTES + byteLength > this.POOL_SIZE) {
-      this.pool = Buffer.allocUnsafe(this.POOL_SIZE);
-      this.offset = 0;
-    }
-    // else this.POOL_SIZE = (this.HEADER_BYTES + byteLength) * 4;
+    const byteLength = Buffer.byteLength(str, 'ascii');
+    const header = byteLength.toString().padStart(this.HEADER_BYTES, '0');
+    return header + str;
   }
 
   /**
    * @param {Buffer} chunk
-   * @param {function(Buffer)} cb
+   * @param {function(Buffer): void} cb
+   * @returns {void}
    */
   decode(chunk, cb) {
-    this.buffers.push(chunk);
-    this.totalLength += chunk.length;
+    //-fast path for a single complete message
+    const messageTotal = this.HEADER_BYTES + this._parseHeader(chunk);
+    if (chunk.length === messageTotal) {
+      const payloadBuf = chunk.subarray(this.HEADER_BYTES, messageTotal);
+      return cb(payloadBuf);
+    }
+    //-medium path for n complete messages with leftover
     while (true) {
-      if (this.expectedLength === null) {
-        if (this.totalLength < this.HEADER_BYTES) break;
-        const header = this._readBytes(this.HEADER_BYTES);
-        this.expectedLength = header.readUInt32BE(0);
-      }
-      if (this.totalLength < this.expectedLength) break;
-      const payload = this._readBytes(this.expectedLength);
-      cb(payload);
-      this.expectedLength = null;
+      const messageTotal = this.HEADER_BYTES + this._parseHeader(chunk);
+      // stop if incomplete or invalid
+      if (messageTotal > 0 && chunk.length > messageTotal) {
+        const payloadBuf = chunk.subarray(this.HEADER_BYTES, messageTotal);
+        cb(payloadBuf);
+        chunk = chunk.subarray(messageTotal);
+      } else break;
+    }
+    //-slow path for incomplete messages
+    // append incoming chunk to our leftover buffer
+    this.buffer = Buffer.concat([this.buffer, chunk]);
+    // process as many full messages as possible
+    while (true) {
+      // need at least HEADER_BYTES to know payload length
+      if (this.buffer.length < this.HEADER_BYTES) return;
+      // read header as ASCII digits
+      const messageTotal = this.HEADER_BYTES + this._parseHeader(this.buffer);
+      // do we have the full payload yet?
+      if (this.buffer.length < messageTotal) return; // wait for more data
+      // extract payload (make a copy to avoid retaining a huge buffer)
+      const payloadBuf = this.buffer.subarray(this.HEADER_BYTES, messageTotal);
+      // advance buffer (slice returns a new view; reassign to leftover copy)
+      this.buffer = this.buffer.subarray(messageTotal);
+      cb(payloadBuf);
     }
   }
 
-  _readBytes(n) {
-    let remaining = n;
-    let offset = 0;
-    const out = Buffer.allocUnsafe(n);
-    while (remaining > 0) {
-      const buf = this.buffers[0];
-      const take = Math.min(buf.length, remaining);
-      buf.copy(out, offset, 0, take);
-      if (take < buf.length) this.buffers[0] = buf.slice(take);
-      else this.buffers.shift();
-      offset += take;
-      remaining -= take;
+  /**
+   * Parses ASCII digits from a buffer starting at 0 for headerBytes length
+   * @param {Buffer} buffer
+   */
+  _parseHeader(buffer) {
+    let len = 0;
+    //loop through each digit in the header
+    for (let i = 0; i < this.HEADER_BYTES; i++) {
+      // assuming ASCII '0'..'9'
+      //add the new digit to the end of the number
+      len = len * 10 + (buffer[i] - 48);
     }
-    this.totalLength -= n;
-    return out;
+    return len;
   }
 }
