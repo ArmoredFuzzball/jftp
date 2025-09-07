@@ -38,7 +38,7 @@ export default class UDSocket extends net.Socket {
   /**
    * Send an RPC-style message (JSON) to the server process and return a Promise that resolves with JSON data.
    */
-  rpc(data?: string | Object): Promise<string | Object | undefined>;
+  rpc(data?: string | Object): Promise<string | Object>;
 
   /**
    * Install a handler function for incoming requests.
@@ -46,7 +46,7 @@ export default class UDSocket extends net.Socket {
    * 
    * Errors can be safely thrown inside the handler and will be sent back to the requester as an error response.
    */
-  handle(handler: (data?: string | Object) => string | Object | undefined | Promise<string | Object | undefined>): void;
+  handle(handler: (data?: string | Object, socket?: UDSocket) => (string | Object | Promise<string | Object>)): void;
 
   /**
    * Set a custom JSON serializer function for outgoing messages.

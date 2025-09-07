@@ -97,7 +97,7 @@ export class UDSocketServer extends Server {
     if (!socket.handler) return;
     const request = JSON.parse(message);
     try {
-      const result = socket.handler(request[1]);
+      const result = socket.handler(request[1], socket);
       if (!(result instanceof Promise)) {
         request[1] = result;
         return socket._send(request);
