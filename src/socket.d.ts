@@ -3,7 +3,7 @@ import * as net from 'net';
 /** Options for the payload encoder/decoder */
 export interface EncoderOptions {
   /**
-   * Number of digits used to represent the max length of a message in decimal form (default 7).
+   * Number of digits used to represent the maximum byte-length of a message in decimal form (default 7).
    * 
    * E.g. 7 digits allows messages up to 9,999,999 bytes (under 10MB).
    */

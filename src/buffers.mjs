@@ -6,7 +6,7 @@ export default class PayloadEncoder {
 
   /** @param {string} str */
   encode(str) {
-    const byteLength = Buffer.byteLength(str, 'ascii');
+    const byteLength = Buffer.byteLength(str, 'utf8');
     const header = byteLength.toString().padStart(this.HEADER_BYTES, '0');
     return header + str;
   }
@@ -40,7 +40,7 @@ export default class PayloadEncoder {
     while (true) {
       // need at least HEADER_BYTES to know payload length
       if (this.buffer.length < this.HEADER_BYTES) return;
-      // read header as ASCII digits
+      // read header as utf8 digits
       const messageTotal = this.HEADER_BYTES + this._parseHeader(this.buffer);
       // do we have the full payload yet?
       if (this.buffer.length < messageTotal) return; // wait for more data
@@ -53,14 +53,14 @@ export default class PayloadEncoder {
   }
 
   /**
-   * Parses ASCII digits from a buffer starting at 0 for headerBytes length
+   * Parses utf8 digits from a buffer starting at 0 for HEADER_BYTES length
    * @param {Buffer} buffer
    */
   _parseHeader(buffer) {
     let len = 0;
     //loop through each digit in the header
     for (let i = 0; i < this.HEADER_BYTES; i++) {
-      // assuming ASCII '0'..'9'
+      // assuming utf8 '0'..'9'
       //add the new digit to the end of the number
       len = len * 10 + (buffer[i] - 48);
     }
