@@ -1,7 +1,7 @@
 {
   "name": "jftp",
   "description": "Node.js interprocess communication with JSON",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "type": "module",
   "main": "src/socket.mjs",
   "types": "src/socket.d.ts",
@@ -32,5 +32,8 @@
     "fast",
     "transfer",
     "protocol"
-  ]
+  ],
+  "optionalDependencies": {
+    "fast-json-stringify": "^6.0.1"
+  }
 }

@@ -1,14 +1,16 @@
-import net from 'node:net';
+import { Socket, Server } from 'node:net';
 import { unlinkSync, existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import PayloadEncoder from './buffers.mjs';
 
-export default class UDSocket extends net.Socket {
+export default class UDSocket extends Socket {
   constructor(options = { timeoutMs: undefined, encoderOptions: undefined, socketOptions: undefined }) {
     super(options.socketOptions);
     this.timeoutMs = options.timeoutMs ?? 5000;
     this.encoder = new PayloadEncoder(options.encoderOptions);
     this.ACKQueue = {};
     this.counter = 0;
+    this.serializer = JSON.stringify;
     this.processor = this._processResponse;
     this.on('data', this._receive);
   }
@@ -20,6 +22,10 @@ export default class UDSocket extends net.Socket {
   }
 
   handle(fn) { this.handler = fn }
+  schema(fn) {
+    this.serializer = fn;
+    return this;
+  }
 
   _addToACKQueue(id, resolve, reject) {
     this.ACKQueue[id] = {
@@ -31,7 +37,7 @@ export default class UDSocket extends net.Socket {
 
   _send(data) {
     if (this.closed) throw new Error("Socket is closed");
-    const string = JSON.stringify(data);
+    const string = this.serializer(data);
     const payload = this.encoder.encode(string);
     this.write(payload);
   }
@@ -51,7 +57,7 @@ export default class UDSocket extends net.Socket {
   }
 }
 
-export class UDSocketServer extends net.Server {
+export class UDSocketServer extends Server {
   constructor(clientOptions = undefined, connectionListener) {
     const wrap = (fn) => (sock) => fn(this._wrapSocket(sock, clientOptions));
     super(connectionListener ? wrap(connectionListener) : undefined);
@@ -75,6 +81,7 @@ export class UDSocketServer extends net.Server {
       encoder: tmp.encoder,
       ACKQueue: tmp.ACKQueue,
       counter: tmp.counter,
+      serializer: tmp.serializer,
       processor: this._processRequest.bind(this, socket),
     });
     socket.removeListener("data", socket._receive);
@@ -107,4 +114,27 @@ export class UDSocketServer extends net.Server {
     else response[2] = err;
     socket._send(response);
   }
+}
+
+const require = createRequire(import.meta.url);
+const fastJson = (moduleName => {
+  try {
+    return require(moduleName);
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') return;
+    throw err;
+  }
+})('fast-json-stringify');
+
+export function createSerializer(json) {
+  if (!fastJson) throw new Error("fast-json-stringify is not installed");
+  return fastJson({
+    title: 'message',
+    type: 'array',
+    items: [
+      { type: 'number' },
+      json,
+      { type: ['object', 'string', 'null'] }
+    ]
+  });
 }

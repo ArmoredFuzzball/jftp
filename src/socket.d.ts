@@ -47,6 +47,16 @@ export default class UDSocket extends net.Socket {
    * Errors can be safely thrown inside the handler and will be sent back to the requester as an error response.
    */
   handle(handler: (data?: string | Object) => string | Object | undefined | Promise<string | Object | undefined>): void;
+
+  /**
+   * Set a custom JSON serializer function for outgoing messages.
+   * By default JSON.stringify is used, but this can be replaced with a faster alternative like fast-json-stringify.
+   * 
+   * The serializer function must take a single Object argument and return a string.
+   * 
+   * If you want to use fast-json-stringify, you can create a serializer with the createSerializer() helper function exported from this module.
+   */
+  schema(serializer: (data: Object) => string): void;
 }
 
 /**
@@ -71,3 +81,23 @@ export class UDSocketServer extends net.Server {
    */
   start(path: string, cb?: () => void): void;
 }
+
+/** Creates a fast-json-stringify serializer for the RPC message format, adding necessary hidden fields to the schema automatically.
+ * 
+ * The generated serializer can be passed to UDSocket.schema() to replace the default JSON.stringify.
+ * 
+ * It is recommended to call this function once per schema at startup and reuse the returned serializer functions for all UDSocket instances.
+ * 
+ * See https://www.npmjs.com/package/fast-json-stringify for more information.
+ * 
+ * @param json A JSON schema object defining the structure of the messages to be serialized.
+ *             This should define the structure of the "data" field only; the "id" and "error" fields are added automatically.
+ * @returns A function that takes an Object and returns a string.
+ * 
+ * @throws If fast-json-stringify is not installed, an error is thrown.
+ */
+export function createSerializer(json: Object): (data: Object) => string;
+
+// Note: fast-json-stringify is an optional dependency. If it's not installed, the code will fall back to JSON.stringify.
+// To use it, install it in your project with: npm i fast-json-stringify
+// Then you can create a serializer with createSerializer() and pass it to UDSocket.schema().

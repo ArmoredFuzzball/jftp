@@ -53,10 +53,18 @@ Unix Domain Sockets are not exposed to the network. Instead, they are files in t
 <h2>Server Example</h2>
 
 ```js
-import { UDSocketServer } from 'jftp';
+import { UDSocketServer, createSerializer } from 'jftp';
 const SOCKET_PATH = './secure_directory/my_socket.sock';
 
 const server = new UDSocketServer();
+
+// Create optional serializer for improved performance
+const serializer = createSerializer({
+  type: 'object',
+  properties: {
+    anything: { type: 'string' }
+  }
+});
 
 // Handle incoming connections
 server.on('connection', (socket) => {
@@ -65,6 +73,7 @@ server.on('connection', (socket) => {
   // Handle incoming messages
   socket.handle((message) => {
     console.log('Received message:', message);
+    socket.schema(serializer); // Use custom serializer for responses
     return { anything: 'Hello from server!' };
   });
 
@@ -86,10 +95,18 @@ server.start(SOCKET_PATH, () => console.log(`Server listening on ${SOCKET_PATH}`
 <h2>Client Example</h2>
 
 ```js
-import UDSocket from 'jftp';
+import UDSocket, { createSerializer } from 'jftp';
 const SOCKET_PATH = './secure_directory/my_socket.sock';
 
 const socket = new UDSocket({ timeoutMs: 3000 }); //custom timeout
+
+// Create optional serializer for improved performance
+const serializer = createSerializer({
+  type: 'object',
+  properties: {
+    anything: { type: 'string' }
+  }
+});
 
 // Handle socket errors
 socket.on('error', (error) => {
@@ -101,7 +118,7 @@ socket.connect(SOCKET_PATH, () => {
   console.log("Connected to the server");
 
   // Send a message and wait for a response
-  socket.rpc({ anything: 'Hello from client!' })
+  socket.schema(serializer).rpc({ anything: 'Hello from client!' })
     .then(response => {
       console.log('Received response:', response);
     })
