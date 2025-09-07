@@ -14,9 +14,10 @@ export interface EncoderOptions {
 export interface Options {
   /** Number of milliseconds to wait for an ACK before rejecting the rpc Promise (default 5000). */
   timeoutMs?: number;
-
   /** Options object passed to the internal encoder/decoder */
   encoderOptions?: EncoderOptions;
+  /** Options object passed to the internal net.Socket constructor */
+  socketOptions?: net.SocketConstructorOpts;
 }
 
 /**

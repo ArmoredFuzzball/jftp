@@ -3,8 +3,8 @@ import { unlinkSync, existsSync } from 'node:fs';
 import PayloadEncoder from './buffers.mjs';
 
 export default class UDSocket extends net.Socket {
-  constructor(options = { timeoutMs: undefined, encoderOptions: undefined }) {
-    super();
+  constructor(options = { timeoutMs: undefined, encoderOptions: undefined, socketOptions: undefined }) {
+    super(options.socketOptions);
     this.timeoutMs = options.timeoutMs ?? 5000;
     this.encoder = new PayloadEncoder(options.encoderOptions);
     this.ACKQueue = {};
